@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.flowstallion.tunnel-sync</string>
+
+    <!-- Periodic job: runs tunnel.sh sync-webhook every 60 seconds,
+         re-pointing the GitHub webhook at the current trycloudflare public URL. -->
+    <!-- This file is an in-repo reference copy; script/log paths use the __HOME__ placeholder.
+         `./scripts/tunnel.sh install-sync` generates a plist with real paths into
+         ~/Library/LaunchAgents/ and loads it, so this file needs no manual edits. -->
+    <!-- Note: the script path points at ~/.flowstallion/tunnel.sh (the staged copy generated
+         by install-sync), not the file in the repo — launchd agents cannot read
+         ~/Documents (macOS TCC denies /bin/bash access with EPERM).
+         After modifying tunnel.sh, re-run install-sync to refresh the staged copy. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__HOME__/.flowstallion/tunnel.sh</string>
+        <string>sync-webhook</string>
+    </array>
+
+    <!-- Fires every 60 seconds; no RunAtLoad/KeepAlive (pure periodic job) -->
+    <key>StartInterval</key>
+    <integer>60</integer>
+
+    <!-- Logs (stdout/stderr merged for timeline debugging) -->
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/flowstallion/tunnel-sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/flowstallion/tunnel-sync.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

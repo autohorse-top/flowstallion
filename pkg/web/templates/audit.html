@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="audit" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <h1>Audit log</h1>
+    <form id="audit-filters" class="row wrap">
+      <label>Action
+        <select id="f-action">
+          <option value="">all</option>
+          <option value="auth.login">auth.login</option>
+          <option value="auth.logout">auth.logout</option>
+          <option value="auth.deny">auth.deny</option>
+          <option value="pipeline.upsert">pipeline.upsert</option>
+          <option value="run.trigger">run.trigger</option>
+          <option value="run.cancel">run.cancel</option>
+          <option value="run.approve">run.approve</option>
+          <option value="run.reject">run.reject</option>
+          <option value="scan.save">scan.save</option>
+          <option value="canary.create">canary.create</option>
+          <option value="canary.rollback">canary.rollback</option>
+          <option value="user.create">user.create</option>
+          <option value="user.delete">user.delete</option>
+          <option value="secret.upsert">secret.upsert</option>
+          <option value="secret.delete">secret.delete</option>
+          <option value="scm.push">scm.push</option>
+          <option value="scm.pull_request">scm.pull_request</option>
+        </select>
+      </label>
+      <label>Actor
+        <input id="f-actor" placeholder="actor">
+      </label>
+      <label>Range
+        <select id="f-range">
+          <option value="3600" selected>1h</option>
+          <option value="86400">24h</option>
+          <option value="604800">7d</option>
+          <option value="0">all</option>
+        </select>
+      </label>
+      <button id="f-apply" class="btn" type="submit">Apply</button>
+    </form>
+    <div id="audit" class="loading">Loading…</div>
+    <div class="row">
+      <button id="audit-more" class="btn" type="button" hidden>Load more</button>
+      <span id="audit-note" class="muted"></span>
+    </div>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.git
+*.db
+*.log
+node_modules
+mem0_local_storage
+agent/.venv
+**/__pycache__
+*.pyc

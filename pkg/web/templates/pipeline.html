@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="pipeline" data-name="{{.PipelineName}}" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <p><a href="/" class="muted">← all pipelines</a></p>
+    <h1 id="pname">{{.PipelineName}}</h1>
+    <div class="row">
+      {{if .CanOperate}}<button id="trigger" class="btn primary">Trigger run</button>{{end}}
+      <span id="trigger-msg" class="muted"></span>
+    </div>
+  </section>
+  {{if .CanAdmin}}
+  <section class="card" id="yaml-card">
+    <h2>Pipeline YAML</h2>
+    <p id="yaml-error" class="error"></p>
+    <textarea id="yaml" class="yamlbox" spellcheck="false"></textarea>
+    <div class="row">
+      <button id="yaml-save" class="btn primary">Save</button>
+      <span id="yaml-msg" class="muted"></span>
+    </div>
+  </section>
+  {{else}}
+  <section class="card" id="yaml-card">
+    <h2>Pipeline YAML</h2>
+    <pre id="yaml-view" class="logbox"></pre>
+  </section>
+  {{end}}
+  <section class="card">
+    <h2>Canaries</h2>
+    <div id="canaries" class="loading">Loading…</div>
+  </section>
+  <section class="card">
+    <h2>Runs</h2>
+    <div id="runs" class="loading">Loading…</div>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

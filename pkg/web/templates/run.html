@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="run" data-run="{{.RunID}}" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <p><a href="/" class="muted">← home</a></p>
+    <h1>Run #{{.RunID}}</h1>
+    <div id="run-info" class="loading">Loading…</div>
+    {{if .CanOperate}}
+    <div class="row"><button id="cancel" class="btn danger">Cancel run</button></div>
+    <div class="row" id="approval" hidden>
+      <span class="muted">Policy hold: approval required before this run executes.</span>
+      <button id="approve" class="btn">Approve</button>
+      <button id="reject" class="btn danger">Reject</button>
+    </div>
+    {{end}}
+  </section>
+  <section class="card">
+    <h2>Steps</h2>
+    <div id="steps" class="loading">Loading…</div>
+  </section>
+  <section class="card">
+    <h2>Root cause analysis</h2>
+    <div id="rca" class="loading">Loading…</div>
+  </section>
+  <section class="card" id="pr-review-card" hidden>
+    <h2>PR review</h2>
+    <div id="pr-review"></div>
+  </section>
+  <section class="card" id="test-selection-card" hidden>
+    <h2>Test selection</h2>
+    <div id="test-selection"></div>
+  </section>
+  <section class="card">
+    <h2>Security scans</h2>
+    <div id="scans" class="loading">Loading…</div>
+  </section>
+  <section class="card">
+    <h2>Logs</h2>
+    <div id="log-step" class="muted">Select a step to view its logs.</div>
+    <pre id="logs" class="logbox"></pre>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

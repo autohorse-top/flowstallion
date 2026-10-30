@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="settings" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <h1>Settings</h1>
+    <p class="muted">Admin only. Secret values are never shown again once stored.</p>
+  </section>
+  <section class="card">
+    <h2>Users</h2>
+    <div id="users" class="loading">Loading…</div>
+    <form id="user-form" class="form">
+      <label>Username
+        <input id="user-name" autocomplete="off" required>
+      </label>
+      <label>Role
+        <select id="user-role">
+          <option value="viewer">viewer</option>
+          <option value="operator">operator</option>
+          <option value="admin">admin</option>
+        </select>
+      </label>
+      <label>Password
+        <input id="user-password" type="password" autocomplete="new-password" required>
+      </label>
+      <div class="row">
+        <button id="user-create" class="btn primary" type="submit">Create user</button>
+        <span id="user-msg" class="muted"></span>
+      </div>
+    </form>
+  </section>
+  <section class="card">
+    <h2>Secrets</h2>
+    <div id="secrets" class="loading">Loading…</div>
+    <form id="secret-form" class="form">
+      <label>Name
+        <input id="secret-name" autocomplete="off" required>
+      </label>
+      <label>Value
+        <input id="secret-value" type="password" autocomplete="new-password" required>
+      </label>
+      <div class="row">
+        <button id="secret-save" class="btn primary" type="submit">Save secret</button>
+        <span id="secret-msg" class="muted"></span>
+      </div>
+    </form>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · FlowStallion</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="login" data-next="{{.Next}}">
+<header><a class="brand" href="/">FlowStallion</a><span class="sub">open-source SDLC platform</span></header>
+<main class="login-main">
+  <section class="card login-card">
+    <h1>Sign in</h1>
+    <form id="login-form">
+      <label>Username
+        <input id="username" autocomplete="username" required autofocus>
+      </label>
+      <label>Password
+        <input id="password" type="password" autocomplete="current-password" required>
+      </label>
+      <div class="row"><button id="submit" class="btn primary" type="submit">Sign in</button></div>
+      <p id="msg" class="error"></p>
+    </form>
+    <!-- m2 mount point: revealed by the inline script when the ?next= target
+         bounces back to /login (e.g. /settings for a non-admin), so the
+         302 -> login -> redirect loop stops with a visible explanation
+         instead of the browser's "too many redirects". -->
+    <p id="no-access" class="error" hidden>Your role does not have access to that page. <a href="/">Go to dashboard</a></p>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  var next = document.body.dataset.next || "/";
+  if (!next.startsWith("/") || next.startsWith("//")) next = "/";
+  function dest() {
+    return next + (next.indexOf("?") >= 0 ? "&" : "?") + "flowstallion=" +
+      encodeURIComponent(localStorage.getItem("flowstallion-token") || "");
+  }
+  function fail(msg) {
+    var el = document.getElementById("msg");
+    if (el) el.textContent = msg;
+  }
+  // m2: pre-flight probe before navigating to the ?next= destination. If the
+  // destination itself bounces back to /login (e.g. /settings for a
+  // non-admin — the server-side 302 is the intended RBAC decision), do NOT
+  // navigate: reveal the #no-access notice and keep the sign-in form visible,
+  // instead of looping 302 -> login -> replace -> 302 until the browser's
+  // "too many redirects" limit. The session stays valid for pages the role
+  // can access.
+  function goNext() {
+    fetch(dest(), { redirect: "follow" }).then(function (r) {
+      if (r.redirected) {
+        var u = null;
+        try { u = new URL(r.url); } catch (_) { /* unparseable: fall through */ }
+        if (u && u.pathname === "/login") {
+          var na = document.getElementById("no-access");
+          if (na) na.hidden = false;
+          fail("Your role does not have access to that page.");
+          return;
+        }
+      }
+      location.replace(dest());
+    }).catch(function () {
+      // Probe failed (transient network/server error): fall back to the
+      // plain redirect so a failed probe never strands the user here.
+      location.replace(dest());
+    });
+  }
+  // If a session token is already stored and still valid, skip the form.
+  var stored = localStorage.getItem("flowstallion-token") || "";
+  if (stored) {
+    fetch("/api/auth/me", { headers: { Authorization: "Bearer " + stored } }).then(function (r) {
+      if (r.ok) { goNext(); }
+      else { localStorage.removeItem("flowstallion-token"); fail("Session expired — sign in again."); }
+    }).catch(function () {
+      localStorage.removeItem("flowstallion-token");
+      fail("Cannot reach the scheduler.");
+    });
+  }
+  document.getElementById("login-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var u = document.getElementById("username").value;
+    var p = document.getElementById("password").value;
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, password: p }),
+    }).then(function (r) {
+      if (r.ok) {
+        return r.json().then(function (j) {
+          localStorage.setItem("flowstallion-token", j.token);
+          // m2: same pre-flight — a fresh viewer session must not loop on a
+          // /settings next either.
+          goNext();
+        });
+      }
+      return r.json().then(function (j) {
+        fail((j && j.error) || "HTTP " + r.status);
+      }).catch(function () { fail("HTTP " + r.status); });
+    }).catch(function () { fail("Cannot reach the scheduler."); });
+  });
+})();
+</script>
+</body>
+</html>

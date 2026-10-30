@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go-gate:
+    name: go-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Build, vet, test
+        run: |
+          go build ./...
+          go vet ./...
+          go test ./...
+
+  python-gate:
+    name: python-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dev extras
+        run: pip install -e "agent[dev]"
+      - name: pytest + mypy
+        run: |
+          pytest agent/tests -q
+          mypy --config-file agent/pyproject.toml agent/

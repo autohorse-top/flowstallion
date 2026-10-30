@@ -1,0 +1,24 @@
+# FlowStallion canary demo app image.
+# Two variants are built with different build-args:
+#   docker build -f demo/Dockerfile.demoapp --build-arg VERSION=1 --build-arg FAIL_RATE=0   -t flowstallion/demoapp:v1 .
+#   docker build -f demo/Dockerfile.demoapp --build-arg VERSION=2 --build-arg FAIL_RATE=0.8 -t flowstallion/demoapp:v2 .
+#
+# v1 is the "healthy" release; v2 fails ~80% of / and /version requests,
+# which makes the canary controller roll it back.
+FROM golang:1.22-alpine AS build
+ARG VERSION=dev
+ARG FAIL_RATE=0
+WORKDIR /src
+COPY cmd/demoapp/main.go .
+RUN go mod init demoapp && \
+    CGO_ENABLED=0 go build -trimpath \
+    -ldflags "-X main.version=${VERSION} -X main.failRate=${FAIL_RATE}" \
+    -o /out/demoapp .
+
+FROM alpine:3.20
+RUN adduser -D -H appuser
+USER appuser
+COPY --from=build /out/demoapp /usr/local/bin/demoapp
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/demoapp"]
+CMD ["-port", "8080"]

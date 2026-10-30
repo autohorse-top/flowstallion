@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="cost" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <h1>Costs</h1>
+    <p class="row">
+      <a href="/cost?by=pr">by PR</a> ·
+      <a href="/cost?by=team">by team</a> ·
+      <a href="/cost?by=pr&source=llm">LLM only</a> ·
+      <a href="/cost?by=pr&source=cloud">Cloud only</a>
+    </p>
+    <div id="cost" class="loading">Loading…</div>
+    <p id="cost-total" class="muted"></p>
+  </section>
+  <section class="card">
+    <h2>Daily cost (7 days)</h2>
+    <div id="cost-chart" class="chart"><span class="muted">Loading…</span></div>
+  </section>
+</main>
+<script src="/static/chart.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

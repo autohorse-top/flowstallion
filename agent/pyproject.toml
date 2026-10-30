@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flowstallion-agent"
+version = "0.0.1"
+description = "FlowStallion AI Agent — failure triage, PR review, smart test selection"
+requires-python = ">=3.10"
+dependencies = [
+    "kuzu==0.11.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "mypy==2.4.0",
+]
+
+[tool.setuptools]
+packages = ["flowstallion_agent"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+
+[[tool.mypy.overrides]]
+module = "kuzu.*"
+ignore_missing_imports = true

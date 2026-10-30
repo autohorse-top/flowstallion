@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+*.egg-info/
+build/
+
+# Go build artifacts
+bin/
+dist/
+vendor/
+
+# Environment / secrets
+.env
+*.env
+
+# OS and editor clutter
+.DS_Store
+.idea/
+.vscode/
+
+# Local data / large build outputs
+*.db
+*.sqlite
+experiments/
+
+# Internal development archives (not shipped with the open-source package)
+.tasks/
+notes/
+mem0_local_storage/
+
+# repo-root build artifacts (go build output; /agent shadows the agent/
+# package dir, so the dir is re-included and only a root-level file named
+# "agent" stays ignored)
+/flowstallion
+/scheduler
+/agent
+!/agent/

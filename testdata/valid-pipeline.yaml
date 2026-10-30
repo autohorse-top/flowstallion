@@ -1,0 +1,48 @@
+# FlowStallion DSL — full-feature example (valid).
+# Validated by: flowstallion validate testdata/valid-pipeline.yaml
+version: 1
+pipeline:
+  name: flowstallion-dsl-demo
+  trigger:
+    - event: push
+      branches:
+        - main
+        - release/*
+    - event: pull_request
+    - event: schedule
+      cron: "0 2 * * *"
+    - event: manual
+  concurrency: 3
+  env:
+    GOFLAGS: "-mod=vendor"
+    REGISTRY: ghcr.io/flowstallion
+  secrets:
+    - GH_TOKEN
+    - registry-password
+  steps:
+    - id: checkout
+      image: alpine
+      commands:
+        - echo fetching source
+    - id: build
+      image: golang:1.22
+      needs:
+        - checkout
+      commands:
+        - go build ./...
+      env:
+        CGO_ENABLED: "0"
+      timeout: 3600
+    - id: test
+      image: golang:1.22
+      needs:
+        - build
+      commands:
+        - go test ./...
+    - id: scan
+      image: ghcr.io/aquasecurity/trivy:0.48.0
+      needs:
+        - build
+      timeout: 900
+      commands:
+        - trivy fs .

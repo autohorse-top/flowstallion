@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Reference copy: paths use the __HOME__ placeholder, replace with your home directory.
+     Normally just run `scripts/tunnel.sh install` to regenerate and load; no manual edits.
+     The cloudflared path defaults to Homebrew (Apple silicon); adjust to your actual install location. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.flowstallion.cloudflared</string>
+
+    <!-- Executable path: macOS arm64 default /opt/homebrew/bin/cloudflared -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/cloudflared</string>
+        <string>tunnel</string>
+        <string>--no-autoupdate</string>
+        <string>--url</string>
+        <string>http://localhost:8080</string>
+    </array>
+
+    <!-- Start automatically at boot -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Auto-restart on crash (KeepAlive) -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Logs -->
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/flowstallion/cloudflared.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/flowstallion/cloudflared-error.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

@@ -1,0 +1,20 @@
+[
+  {"step_id": "deploy-prod", "env": {"environment": "production"}, "level": 2, "approval": true},
+  {"step_id": "deploy-prod", "env": {"ENV": "prod"}, "level": 2, "approval": true},
+  {"step_id": "deploy-prod", "env": {"FLOWSTALLION_ENV": "PRODUCTION"}, "level": 0, "approval": true},
+  {"step_id": "deploy-prod", "env": {"environment": "staging"}, "level": 2, "approval": false},
+  {"step_id": "deploy-prod", "env": {}, "level": 2, "approval": false},
+  {"step_id": "release-prod", "env": {"target": "production"}, "level": 2, "approval": true},
+  {"step_id": "sync-prod", "env": {"environment": "production"}, "level": 2, "approval": false},
+  {"step_id": "sync-prod", "env": {"environment": "production"}, "level": 1, "approval": true},
+  {"step_id": "migrate-db", "env": {}, "level": 2, "approval": false},
+  {"step_id": "migrate-db", "env": {}, "level": 1, "approval": true},
+  {"step_id": "drop-tables", "env": {}, "level": 1, "approval": true},
+  {"step_id": "build", "env": {}, "level": 2, "approval": false},
+  {"step_id": "build", "env": {}, "level": 1, "approval": false},
+  {"step_id": "build", "env": {}, "level": 0, "approval": true},
+  {"step_id": "scan", "env": {"FLOWSTALLION_ENV": "prod"}, "level": 1, "approval": true},
+  {"step_id": "test-unit", "env": {"environment": "production"}, "level": 2, "approval": false},
+  {"step_id": "publish-artifact", "env": {}, "level": 1, "approval": true},
+  {"step_id": "lint", "env": {}, "level": 0, "approval": true}
+]

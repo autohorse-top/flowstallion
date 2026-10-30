@@ -1,0 +1,32 @@
+# FlowStallion DSL — intentionally broken example.
+# Demonstrates `flowstallion validate` reporting multiple problems at once (exit 1).
+# Contains at least 5 distinct error classes:
+#   1. version not 1
+#   2. pipeline.name with illegal character (dot)
+#   3. concurrency out of range
+#   4. invalid trigger event + cron on non-schedule event
+#   5. invalid secret name
+#   6. duplicate step id
+#   7. step with empty command
+#   8. image with embedded newline
+#   9. needs pointing to a non-existent step
+version: 2
+pipeline:
+  name: bad.pipeline
+  concurrency: 0
+  trigger:
+    - event: deploy
+      cron: "0 2 * * *"
+  secrets:
+    - "bad secret!"
+  steps:
+    - id: build
+      image: "alpine\n-hack"
+      commands:
+        - ""
+      needs:
+        - ghost
+    - id: build
+      image: alpine
+      commands:
+        - echo hi

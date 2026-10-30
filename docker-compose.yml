@@ -1,0 +1,107 @@
+# FlowStallion — one-command self-hosting.
+#
+#   docker compose up -d --build
+#
+# The scheduler serves the web console + HTTP API on :8080.
+# The agent polls the scheduler and executes pipeline steps in Docker
+# containers on the host daemon (via the mounted socket).
+#
+# Environment:
+#   DOCKER_SOCK              host docker socket (default /var/run/docker.sock;
+#                            on macOS/colima use e.g. $HOME/.colima/default/docker.sock)
+#   FLOWSTALLION_WEBHOOK_SECRET secret for GitHub webhooks (POST /api/webhooks/github);
+#                            empty => webhook endpoint disabled (503, fail-closed)
+#   FLOWSTALLION_AGENT_NAME     agent registration name (default flowstallion-agent)
+#   FLOWSTALLION_AGENT_TOKEN    machine token sent by the runner agent as
+#                            X-Agent-Token; must equal the scheduler's value
+#                            for /api/agent/* to accept it when auth is on.
+#                            Empty on both sides => open (pre-P6 behaviour).
+#   FLOWSTALLION_RCA_POLL_S     RCA agent poll interval in seconds (default 5)
+#   FLOWSTALLION_LLM_API_KEY    optional LLM API key (OpenAI-compatible, env-only);
+#                            without it the RCA agent falls back to rule-based triage
+#   FLOWSTALLION_LLM_BASE_URL   optional LLM base URL override
+#   FLOWSTALLION_LLM_MODEL      optional LLM model override
+#   FLOWSTALLION_SECRET_KEY     optional server-side vault key (scheduler); set a
+#                            random value to enable encrypted secret storage.
+#                            Unset => secret management disabled (fail-closed:
+#                            secret API 503, pipelines declaring secrets cannot
+#                            be triggered). NEVER commit the real value.
+#   FLOWSTALLION_COST_LEDGER    fixed on both scheduler and ai-agent to
+#                            /data/cost/cost-ledger.jsonl (shared flowstallion-cost named
+#                            volume) so the /cost console page reads the same
+#                            ledger the agent appends to.
+#   FLOWSTALLION_GITHUB_TOKEN   GitHub PAT for the ai-agent; enables posting PR
+#                            reviews back to GitHub (without it, reviews are
+#                            stored as scheduler analysis only).
+#   FLOWSTALLION_GITHUB_API     GitHub REST base (default https://api.github.com;
+#                            point at a local fake for E2E testing).
+#   FLOWSTALLION_REPO_CACHE     PR-head checkout cache dir for real-repo test
+#                            selection inside the ai-agent (default /data/repos,
+#                            on the shared flowstallion-repos volume).
+
+services:
+  scheduler:
+    build: .
+    image: flowstallion:latest
+    command: [scheduler]
+    environment:
+      FLOWSTALLION_DB: /data/flowstallion.db
+      FLOWSTALLION_ADDR: ":8080"
+      FLOWSTALLION_WEBHOOK_SECRET: "${FLOWSTALLION_WEBHOOK_SECRET:-}"
+      FLOWSTALLION_SECRET_KEY: "${FLOWSTALLION_SECRET_KEY:-}"
+      FLOWSTALLION_COST_LEDGER: /data/cost/cost-ledger.jsonl
+    ports:
+      - "8080:8080"
+    volumes:
+      - flowstallion-data:/data
+      - flowstallion-cost:/data/cost
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  agent:
+    image: flowstallion:latest
+    command: [agent]
+    environment:
+      FLOWSTALLION_SERVER: "http://scheduler:8080"
+      FLOWSTALLION_AGENT_NAME: "${FLOWSTALLION_AGENT_NAME:-flowstallion-agent}"
+      FLOWSTALLION_AGENT_TOKEN: "${FLOWSTALLION_AGENT_TOKEN:-}"
+      DOCKER_HOST: "unix:///var/run/docker.sock"
+    volumes:
+      - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro"
+    depends_on:
+      scheduler:
+        condition: service_healthy
+
+  ai-agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    image: flowstallion-ai:latest
+    environment:
+      FLOWSTALLION_SERVER: "http://scheduler:8080"
+      FLOWSTALLION_NOTES_DIR: "/app/notes"
+      FLOWSTALLION_RCA_POLL_S: "${FLOWSTALLION_RCA_POLL_S:-5}"
+      FLOWSTALLION_LLM_API_KEY: "${FLOWSTALLION_LLM_API_KEY:-}"
+      FLOWSTALLION_LLM_BASE_URL: "${FLOWSTALLION_LLM_BASE_URL:-}"
+      FLOWSTALLION_LLM_MODEL: "${FLOWSTALLION_LLM_MODEL:-}"
+      FLOWSTALLION_LLM_PRICE_IN: "${FLOWSTALLION_LLM_PRICE_IN:-}"
+      FLOWSTALLION_LLM_PRICE_OUT: "${FLOWSTALLION_LLM_PRICE_OUT:-}"
+      FLOWSTALLION_COST_LEDGER: /data/cost/cost-ledger.jsonl
+      FLOWSTALLION_GITHUB_TOKEN: "${FLOWSTALLION_GITHUB_TOKEN:-}"
+      FLOWSTALLION_GITHUB_API: "${FLOWSTALLION_GITHUB_API:-}"
+      FLOWSTALLION_REPO_CACHE: "${FLOWSTALLION_REPO_CACHE:-/data/repos}"
+    volumes:
+      - ./notes:/app/notes
+      - flowstallion-cost:/data/cost
+      - flowstallion-repos:/data/repos
+    depends_on:
+      scheduler:
+        condition: service_healthy
+
+volumes:
+  flowstallion-data:
+  flowstallion-cost:
+  flowstallion-repos:

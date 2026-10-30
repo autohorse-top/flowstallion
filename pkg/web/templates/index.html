@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="home" data-auth="{{.AuthEnabled}}">
+<header><a class="brand" href="/">FlowStallion</a><a href="/">Dashboard</a><a href="/cost">Costs</a><a href="/audit">Audit</a>{{if .CanAdmin}}<a href="/settings">Settings</a>{{end}}<span class="sub">open-source SDLC platform</span><span class="spacer"></span><span id="whoami" class="muted"></span><button id="signout" class="btn" type="button" hidden>Sign out</button></header>
+<main>
+  <section class="card">
+    <h1>Dashboard</h1>
+    <div id="stats" class="stats">
+      <div class="stat"><div id="stat-pipelines" class="stat-value">–</div><div class="stat-label">Pipelines</div></div>
+      <div class="stat"><div id="stat-runs" class="stat-value">–</div><div class="stat-label">Runs (7d)</div></div>
+      <div class="stat"><div id="stat-success" class="stat-value">–</div><div class="stat-label">Success rate (7d)</div></div>
+      <div class="stat"><div id="stat-cost" class="stat-value">–</div><div class="stat-label">Total cost</div></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Run activity (7 days)</h2>
+    <div id="chart-7d" class="chart"><span class="muted">Loading…</span></div>
+  </section>
+  <section class="card">
+    <h2>Recent runs</h2>
+    <div id="runs" class="loading">Loading…</div>
+  </section>
+  <section class="card">
+    <h2>Pipelines</h2>
+    <div id="pipelines" class="loading">Loading…</div>
+  </section>
+</main>
+<script src="/static/chart.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
